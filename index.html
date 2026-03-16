@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Defense Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #f4fff7 0%, #e8f8ee 100%);
+      color: #234233;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+      max-width: 950px;
+      margin: 0 auto;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #cfe9d7;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(103, 163, 122, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(103, 163, 122, 0.2);
+    }
+
+    .hero {
+      margin-top: 24px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      color: #2f5d46;
+    }
+
+    .subtitle {
+      color: #6aa17d;
+      margin-top: -4px;
+    }
+
+    .reviewer {
+      background: #f3fff6;
+      border: 1px solid #cfe9d7;
+      border-radius: 16px;
+      padding: 14px;
+      margin: 16px 0;
+    }
+
+    .reviewer ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .reviewer li {
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      background: #ffffff;
+      border: 1px solid #cfe9d7;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      color: #2f5d46;
+      box-shadow: 0 6px 14px rgba(103, 163, 122, 0.08);
+    }
+
+    .progressWrap {
+      margin-bottom: 14px;
+    }
+
+    .progressLabel {
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #4d7b60;
+      font-weight: bold;
+    }
+
+    .progressBar {
+      width: 100%;
+      height: 14px;
+      background: #e5f4ea;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #cfe9d7;
+    }
+
+    .progressFill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #9edbb0 0%, #70c98b 100%);
+      transition: width 0.35s ease;
+    }
+
+    .levelBadge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #dff5e6;
+      border: 1px solid #bfe3cb;
+      color: #35684c;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .choices {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .choiceBtn,
+    .primary {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .choiceBtn {
+      text-align: left;
+      background: #edf9f1;
+      color: #234233;
+      border: 1px solid #c7e6d1;
+      box-shadow: 0 4px 10px rgba(103, 163, 122, 0.08);
+    }
+
+    .choiceBtn:hover {
+      background: #e0f4e8;
+      transform: translateY(-1px) scale(1.01);
+    }
+
+    .choiceBtn:active,
+    .primary:active {
+      transform: scale(0.98);
+    }
+
+    .choiceBtn.correct {
+      background: #c9f2d7;
+      border-color: #71c48e;
+      color: #1e5a39;
+    }
+
+    .choiceBtn.wrong {
+      background: #ffe2e6;
+      border-color: #f0a7b1;
+      color: #8a3b49;
+    }
+
+    .choiceBtn:disabled {
+      opacity: 1;
+      cursor: default;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #9edbb0 0%, #7fc995 100%);
+      color: #173425;
+      font-weight: bold;
+      margin-top: 16px;
+      box-shadow: 0 8px 18px rgba(103, 163, 122, 0.2);
+    }
+
+    .primary:hover {
+      background: linear-gradient(135deg, #91d5a6 0%, #72bf89 100%);
+      transform: translateY(-1px);
+    }
+
+    .primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 13px;
+      border-radius: 14px;
+      display: none;
+      line-height: 1.5;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.correct {
+      background: #ebfff1;
+      border: 1px solid #8cd0a3;
+      color: #24563a;
+    }
+
+    .feedback.wrong {
+      background: #fff1f3;
+      border: 1px solid #efb2bc;
+      color: #8a3b49;
+    }
+
+    .actions {
+      margin-top: 8px;
+    }
+
+    .rankBox {
+      background: #f3fff6;
+      border: 1px solid #cfe9d7;
+      border-radius: 16px;
+      padding: 14px;
+      margin: 14px 0 20px;
+    }
+
+    .reviewAnswers {
+      text-align: left;
+      background: #f9fffb;
+      border: 1px solid #cfe9d7;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .answerItem {
+      border-bottom: 1px solid #dcefe2;
+      padding: 10px 0;
+    }
+
+    .answerItem:last-child {
+      border-bottom: none;
+    }
+
+    .answerItem p {
+      margin: 6px 0;
+    }
+
+    .missionBanner {
+      background: #e8fff0;
+      border: 1px solid #bde1c7;
+      padding: 12px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      font-weight: bold;
+      color: #2f5d46;
+    }
+
+    .pulse {
+      animation: pulse 1.2s infinite;
+    }
+
+    .small {
+      font-size: 14px;
+      color: #4d7b60;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(126, 201, 149, 0.5); }
+      70% { box-shadow: 0 0 0 10px rgba(126, 201, 149, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(126, 201, 149, 0); }
+    }
+
+    @media (min-width: 700px) {
+      .topbar {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="screen active" id="startScreen">
+      <div class="card hero">
+        <h1>Cyber Defense Game</h1>
+        <p class="subtitle">Module 3: Attacking the Foundation</p>
+        <p>
+          You are the SOC analyst on duty. Stop the attacks, protect the network,
+          and survive all 30 incidents.
+        </p>
+
+        <div class="missionBanner pulse">
+          Mission Status: Awaiting analyst deployment
+        </div>
+
+        <div class="reviewer">
+          <h3>Quick Reviewer</h3>
+          <ul>
+            <li><strong>IP Spoofing</strong> - fake source IP used to hide identity or impersonate another host</li>
+            <li><strong>MAC Spoofing</strong> - attacker copies another device MAC address</li>
+            <li><strong>ICMP Recon</strong> - ping and ICMP used to discover active hosts</li>
+            <li><strong>Smurf Attack</strong> - ICMP amplification using broadcast and spoofed victim IP</li>
+            <li><strong>TCP SYN Flood</strong> - many SYNs create half-open connections</li>
+            <li><strong>TCP Reset</strong> - RST packet forcefully ends a TCP session</li>
+            <li><strong>Session Hijacking</strong> - attacker predicts sequence numbers and takes over session</li>
+            <li><strong>UDP Flood</strong> - massive UDP traffic consumes bandwidth and resources</li>
+            <li><strong>TCP</strong> - reliable, flow control, three-way handshake</li>
+            <li><strong>UDP</strong> - connectionless, low overhead, no built-in reliability</li>
+          </ul>
+        </div>
+
+        <button id="startBtn" class="primary pulse">Start Mission</button>
+        <p class="small">Tip: if the button does not work, your uploaded file is incomplete. Replace it with this whole file.</p>
+      </div>
+    </div>
+
+    <div class="screen" id="gameScreen">
+      <div class="topbar">
+        <div class="stat">Question: <span id="qNum">1</span>/30</div>
+        <div class="stat">Score: <span id="score">0</span></div>
+        <div class="stat">Lives: <span id="lives">3</span></div>
+        <div class="stat">Timer: <span id="timer">20</span>s</div>
+      </div>
+
+      <div class="progressWrap">
+        <div class="progressLabel">Mission Progress</div>
+        <div class="progressBar">
+          <div class="progressFill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="levelBadge" id="levelBadge">Level 1 - Recon</div>
+        <h2 id="scenarioTitle">Incident</h2>
+        <p id="questionText"></p>
+        <div id="choices" class="choices"></div>
+        <div id="feedback" class="feedback"></div>
+
+        <div class="actions">
+          <button id="nextBtn" class="primary" disabled>Next Incident</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="endScreen">
+      <div class="card hero">
+        <h1 id="endTitle">Mission Complete</h1>
+        <p id="finalScoreText"></p>
+        <div id="rankBox" class="rankBox"></div>
+
+        <div class="reviewAnswers">
+          <h3>Answer Review</h3>
+          <div id="answerReview"></div>
+        </div>
+
+        <button id="restartBtn" class="primary">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { level:"Level 1 - Recon", title:"Incident 1", question:"The SOC detects many ICMP echo requests sent across several subnets to identify which hosts are active. What is the attacker doing?", choices:["Data exfiltration","Reconnaissance scanning","Privilege escalation","Password hashing"], answer:1, explanation:"ICMP echo requests are commonly used for reconnaissance to find active hosts." },
+      { level:"Level 1 - Recon", title:"Incident 2", question:"A threat actor uses ping responses to map out the network and see which devices are reachable. Which protocol is being abused?", choices:["TCP","UDP","ICMP","ARP only"], answer:2, explanation:"ICMP is used for diagnostics such as ping and is commonly abused for scanning." },
+      { level:"Level 1 - Recon", title:"Incident 3", question:"Attackers use ICMP to learn network topology, active hosts, and even infer firewall behavior. What phase is this?", choices:["Reconnaissance","Covering tracks","Deployment","Patch management"], answer:0, explanation:"This is information gathering before the main attack begins." },
+      { level:"Level 1 - Recon", title:"Incident 4", question:"Which field in the IPv4 header limits how long a packet can stay in the network before being discarded?", choices:["DS field","Header Length","TTL","Flags"], answer:2, explanation:"TTL or Time-to-Live prevents packets from looping forever." },
+      { level:"Level 1 - Recon", title:"Incident 5", question:"Why is IP vulnerable to spoofing attacks?", choices:["IP always encrypts traffic","IP validates the sender identity by default","IP does not verify whether the source IP is real","IP blocks all forged packets"], answer:2, explanation:"IP itself does not confirm that the source IP address actually belongs to the sender." },
+
+      { level:"Level 2 - Spoofing", title:"Incident 6", question:"Packets arrive with fake source addresses to hide the attacker or impersonate a trusted device. What is this attack?", choices:["TCP Reset Attack","IP Spoofing","UDP Flood","Port Address Translation"], answer:1, explanation:"IP spoofing uses forged source IP information." },
+      { level:"Level 2 - Spoofing", title:"Incident 7", question:"The attacker can see traffic between the host and target and uses spoofing while inspecting replies. What type of spoofing is this?", choices:["Blind spoofing","Non-blind spoofing","Wireless spoofing","Broadcast spoofing"], answer:1, explanation:"Non-blind spoofing means the attacker can observe the traffic." },
+      { level:"Level 2 - Spoofing", title:"Incident 8", question:"An attacker cannot see the victim's reply traffic and uses spoofed packets mostly to cause a DoS. What type of spoofing is this?", choices:["Non-blind spoofing","Blind spoofing","MAC filtering","Session reuse"], answer:1, explanation:"Blind spoofing is used when the attacker cannot directly observe the response traffic." },
+      { level:"Level 2 - Spoofing", title:"Incident 9", question:"A device changes its MAC address to match a legitimate host on the internal network. What attack is happening?", choices:["MAC address spoofing","TCP hijacking","ICMP flood","Smurf attack"], answer:0, explanation:"MAC spoofing copies another device's MAC address to impersonate it." },
+      { level:"Level 2 - Spoofing", title:"Incident 10", question:"After the attacker clones another host's MAC address, the switch updates its CAM table and starts forwarding frames to the attacker's port. What allowed this?", choices:["DHCP lease renewal","CAM table overwrite after MAC spoofing","IPv6 extension headers","Checksum failure"], answer:1, explanation:"The switch updates the CAM table to the newest observed port for that MAC." },
+
+      { level:"Level 3 - ICMP Attacks", title:"Incident 11", question:"A server becomes slow because it is receiving an overwhelming amount of ICMP traffic. Which attack is most likely happening?", choices:["ICMP Flood","Session Hijacking","RST Injection","DHCP Starvation"], answer:0, explanation:"Large ICMP traffic volumes can exhaust resources and create a DoS condition." },
+      { level:"Level 3 - ICMP Attacks", title:"Incident 12", question:"The attacker sends an ICMP request to a broadcast address while spoofing the victim's IP, causing many hosts to reply to the victim. What is this attack?", choices:["Smurf Attack","SYN Flood","RST Attack","MAC Flood"], answer:0, explanation:"A Smurf attack is a classic ICMP amplification and reflection attack." },
+      { level:"Level 3 - ICMP Attacks", title:"Incident 13", question:"Which two techniques are commonly paired to make some DoS attacks much more powerful?", choices:["Encryption and compression","Amplification and reflection","Routing and switching","Segmentation and VLANs"], answer:1, explanation:"Amplification increases traffic volume and reflection redirects it toward the victim." },
+      { level:"Level 3 - ICMP Attacks", title:"Incident 14", question:"An analyst says the attacker is using ICMP not only for scanning but also for operating system fingerprinting and firewall discovery. Is that realistic?", choices:["No, ICMP cannot do that","Yes, ICMP can support reconnaissance and scanning","Only with TCP handshakes","Only on IPv6"], answer:1, explanation:"ICMP can reveal useful information about systems and filtering behavior." },
+      { level:"Level 3 - ICMP Attacks", title:"Incident 15", question:"The ping command is best described as which of the following?", choices:["A user-generated ICMP echo request","A TCP session reset","A UDP streaming request","An IPv6 extension header"], answer:0, explanation:"Ping uses ICMP echo request and echo reply messages." },
+
+      { level:"Level 4 - TCP Attacks", title:"Incident 16", question:"A web server receives thousands of SYN packets but the final ACK never arrives. What attack is this?", choices:["UDP Flood","TCP SYN Flood","MAC Spoofing","Smurf Attack"], answer:1, explanation:"A SYN flood abuses the TCP three-way handshake and creates half-open connections." },
+      { level:"Level 4 - TCP Attacks", title:"Incident 17", question:"Why does a SYN flood deny service to legitimate users?", choices:["It deletes routing entries","It overwhelms the host with half-open TCP connections","It disables encryption","It replaces DNS records"], answer:1, explanation:"The server wastes resources waiting on incomplete handshakes." },
+      { level:"Level 4 - TCP Attacks", title:"Incident 18", question:"Which TCP feature is directly exploited by SYN flood attacks?", choices:["Four-way close only","Three-way handshake","Checksum offload","Time synchronization"], answer:1, explanation:"The attack abuses the connection establishment process." },
+      { level:"Level 4 - TCP Attacks", title:"Incident 19", question:"An attacker sends a packet with the RST control bit set, causing an active connection to close immediately. What attack is this?", choices:["TCP Reset Attack","Blind Spoofing","ICMP Redirect","UDP Replay"], answer:0, explanation:"RST tears down the TCP session immediately." },
+      { level:"Level 4 - TCP Attacks", title:"Incident 20", question:"How is a normal TCP connection usually opened?", choices:["RST, ACK, FIN","SYN, SYN-ACK, ACK","ICMP, SYN, ACK","FIN, FIN-ACK, SYN"], answer:1, explanation:"TCP uses the three-way handshake: SYN, SYN-ACK, then ACK." },
+
+      { level:"Level 5 - Session Takeover", title:"Incident 21", question:"A threat actor spoofs one host's IP, predicts the next TCP sequence number, and injects an ACK to take over the connection. What attack is this?", choices:["Session Hijacking","UDP Flood","Smurf Attack","ARP Aging"], answer:0, explanation:"TCP session hijacking takes over an already-authenticated communication." },
+      { level:"Level 5 - Session Takeover", title:"Incident 22", question:"In a successful TCP session hijacking scenario, what can the attacker often do?", choices:["Send data into the session","Read all encrypted traffic automatically","Disable all switches","Convert TCP to UDP"], answer:0, explanation:"If successful, the attacker may be able to send data as part of the session." },
+      { level:"Level 5 - Session Takeover", title:"Incident 23", question:"Which of the following best describes a four-way TCP close process?", choices:["SYN, ACK, FIN, RST","Client FIN, Server ACK, Server FIN, Client ACK","RST, ACK, ACK, FIN","ICMP request, ICMP reply, FIN, ACK"], answer:1, explanation:"A graceful TCP close typically uses FIN and ACK from both sides." },
+      { level:"Level 5 - Session Takeover", title:"Incident 24", question:"Which TCP feature helps make communication stateful?", choices:["Three-way handshake","Broadcast forwarding","Port mirroring","ICMP diagnostics"], answer:0, explanation:"The handshake establishes and tracks the connection state." },
+      { level:"Level 5 - Session Takeover", title:"Incident 25", question:"TCP provides which set of services?", choices:["Reliable delivery, flow control, and stateful communication","Broadcast discovery, TTL updates, and ARP learning","Only media streaming and VoIP","ICMP diagnostics and route tracing"], answer:0, explanation:"TCP is designed for reliable, stateful communication with flow control." },
+
+      { level:"Level 6 - UDP Attacks", title:"Incident 26", question:"A VoIP server is hit by a huge number of UDP packets across many ports, consuming resources and bandwidth. What attack is this?", choices:["TCP Reset Attack","UDP Flood","MAC Spoofing","Session Hijacking"], answer:1, explanation:"UDP floods overwhelm a target with large volumes of UDP traffic." },
+      { level:"Level 6 - UDP Attacks", title:"Incident 27", question:"Why is UDP attractive for real-time applications like VoIP and streaming?", choices:["It performs the full TCP handshake","It has low overhead and is connectionless","It always encrypts payloads","It guarantees delivery"], answer:1, explanation:"UDP is lightweight and fast, which suits real-time traffic." },
+      { level:"Level 6 - UDP Attacks", title:"Incident 28", question:"Which of the following commonly uses UDP?", choices:["DNS and DHCP","HTTP only","SSH only","TLS handshakes only"], answer:0, explanation:"DNS and DHCP are common examples of UDP-based protocols." },
+      { level:"Level 6 - UDP Attacks", title:"Incident 29", question:"Which statement about UDP security is most accurate based on the lesson?", choices:["UDP has built-in encryption by default","UDP cannot be altered in transit","UDP does not provide encryption by default","UDP always rejects modified payloads"], answer:2, explanation:"UDP itself does not include encryption by default." },
+      { level:"Level 6 - UDP Attacks", title:"Incident 30", question:"Why is TCP usually considered more reliable than UDP?", choices:["TCP uses acknowledgments, retransmissions, and flow control","TCP is always faster than UDP","TCP has no connection setup","TCP removes the need for sequence tracking"], answer:0, explanation:"TCP provides reliability through acknowledgments, retransmissions, and flow control." }
+    ];
+
+    const startScreen = document.getElementById("startScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const endScreen = document.getElementById("endScreen");
+
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const qNum = document.getElementById("qNum");
+    const scoreEl = document.getElementById("score");
+    const livesEl = document.getElementById("lives");
+    const timerEl = document.getElementById("timer");
+    const levelBadge = document.getElementById("levelBadge");
+    const scenarioTitle = document.getElementById("scenarioTitle");
+    const questionText = document.getElementById("questionText");
+    const choicesEl = document.getElementById("choices");
+    const feedbackEl = document.getElementById("feedback");
+    const progressFill = document.getElementById("progressFill");
+
+    const endTitle = document.getElementById("endTitle");
+    const finalScoreText = document.getElementById("finalScoreText");
+    const rankBox = document.getElementById("rankBox");
+    const answerReview = document.getElementById("answerReview");
+
+    let currentIndex = 0;
+    let score = 0;
+    let lives = 3;
+    let timer = 20;
+    let interval = null;
+    let locked = false;
+    let userAnswers = [];
+
+    function beep(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "sine";
+        oscillator.frequency.value = freq;
+        gainNode.gain.value = 0.05;
+        oscillator.start();
+        setTimeout(() => {
+          oscillator.stop();
+          audioCtx.close();
+        }, duration);
+      } catch (e) {}
+    }
+
+    function showScreen(screen) {
+      [startScreen, gameScreen, endScreen].forEach(s => s.classList.remove("active"));
+      screen.classList.add("active");
+    }
+
+    function updateProgress() {
+      const percent = (currentIndex / questions.length) * 100;
+      progressFill.style.width = percent + "%";
+    }
+
+    function startGame() {
+      currentIndex = 0;
+      score = 0;
+      lives = 3;
+      timer = 20;
+      locked = false;
+      userAnswers = [];
+      nextBtn.textContent = "Next Incident";
+      updateStats();
+      updateProgress();
+      showScreen(gameScreen);
+      beep(700, 120);
+      renderQuestion();
+    }
+
+    function updateStats() {
+      qNum.textContent = currentIndex + 1;
+      scoreEl.textContent = score;
+      livesEl.textContent = lives;
+      timerEl.textContent = timer;
+    }
+
+    function startTimer() {
+      clearInterval(interval);
+      timer = 20;
+      timerEl.textContent = timer;
+
+      interval = setInterval(() => {
+        timer--;
+        timerEl.textContent = timer;
+
+        if (timer <= 5) {
+          timerEl.style.color = "#b24557";
+        } else {
+          timerEl.style.color = "";
+        }
+
+        if (timer <= 0) {
+          clearInterval(interval);
+          if (!locked) {
+            handleTimeout();
+          }
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      locked = false;
+      nextBtn.disabled = true;
+      feedbackEl.className = "feedback";
+      feedbackEl.innerHTML = "";
+      feedbackEl.classList.remove("show");
+
+      const q = questions[currentIndex];
+      levelBadge.textContent = q.level;
+      scenarioTitle.textContent = q.title;
+      questionText.textContent = q.question;
+      choicesEl.innerHTML = "";
+      timerEl.style.color = "";
+      updateProgress();
+
+      q.choices.forEach((choice, index) => {
+        const btn = document.createElement("button");
+        btn.className = "choiceBtn";
+        btn.textContent = `${String.fromCharCode(65 + index)}. ${choice}`;
+        btn.addEventListener("click", () => handleAnswer(index));
+        choicesEl.appendChild(btn);
+      });
+
+      updateStats();
+      startTimer();
+    }
+
+    function handleAnswer(selectedIndex) {
+      if (locked) return;
+      locked = true;
+      clearInterval(interval);
+
+      const q = questions[currentIndex];
+      const buttons = document.querySelectorAll(".choiceBtn");
+      const correctIndex = q.answer;
+      const isCorrect = selectedIndex === correctIndex;
+
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === correctIndex) btn.classList.add("correct");
+        if (i === selectedIndex && i !== correctIndex) btn.classList.add("wrong");
+      });
+
+      if (isCorrect) {
+        score++;
+        beep(880, 120);
+        feedbackEl.className = "feedback correct show";
+        feedbackEl.innerHTML = `<strong>Correct.</strong> ${q.explanation}`;
+      } else {
+        lives--;
+        beep(240, 220);
+        feedbackEl.className = "feedback wrong show";
+        feedbackEl.innerHTML = `<strong>Wrong.</strong> Correct answer: <strong>${String.fromCharCode(65 + correctIndex)}. ${q.choices[correctIndex]}</strong><br>${q.explanation}`;
+      }
+
+      userAnswers.push({
+        question: q.question,
+        selected: q.choices[selectedIndex],
+        correct: q.choices[correctIndex],
+        isCorrect
+      });
+
+      updateStats();
+      nextBtn.disabled = false;
+
+      if (lives <= 0) {
+        nextBtn.textContent = "See Results";
+      } else if (currentIndex === questions.length - 1) {
+        nextBtn.textContent = "Finish Mission";
+      } else {
+        nextBtn.textContent = "Next Incident";
+      }
+    }
+
+    function handleTimeout() {
+      locked = true;
+      beep(180, 300);
+      const q = questions[currentIndex];
+      const buttons = document.querySelectorAll(".choiceBtn");
+      const correctIndex = q.answer;
+
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === correctIndex) btn.classList.add("correct");
+      });
+
+      lives--;
+      userAnswers.push({
+        question: q.question,
+        selected: "No answer",
+        correct: q.choices[correctIndex],
+        isCorrect: false
+      });
+
+      feedbackEl.className = "feedback wrong show";
+      feedbackEl.innerHTML = `<strong>Time's up.</strong> Correct answer: <strong>${String.fromCharCode(65 + correctIndex)}. ${q.choices[correctIndex]}</strong><br>${q.explanation}`;
+
+      updateStats();
+      nextBtn.disabled = false;
+
+      if (lives <= 0) {
+        nextBtn.textContent = "See Results";
+      } else if (currentIndex === questions.length - 1) {
+        nextBtn.textContent = "Finish Mission";
+      } else {
+        nextBtn.textContent = "Next Incident";
+      }
+    }
+
+    function nextQuestion() {
+      if (lives <= 0) {
+        endGame(false);
+        return;
+      }
+
+      currentIndex++;
+
+      if (currentIndex >= questions.length) {
+        endGame(true);
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function getRank(scoreValue) {
+      if (scoreValue >= 27) return "Elite SOC Commander";
+      if (scoreValue >= 23) return "Senior Security Analyst";
+      if (scoreValue >= 18) return "Network Defender";
+      if (scoreValue >= 12) return "Junior Cyber Analyst";
+      return "Needs More Review";
+    }
+
+    function endGame(completed) {
+      clearInterval(interval);
+      showScreen(endScreen);
+
+      const rank = getRank(score);
+
+      if (completed) {
+        endTitle.textContent = "Mission Complete";
+        beep(920, 140);
+      } else {
+        endTitle.textContent = "System Breached";
+        beep(160, 400);
+      }
+
+      finalScoreText.textContent = `Final Score: ${score} / ${questions.length}`;
+      rankBox.innerHTML = `<strong>Rank:</strong> ${rank}<br><br><strong>Lives Remaining:</strong> ${Math.max(lives, 0)}<br><br><strong>Performance:</strong> ${Math.round((score / questions.length) * 100)}%`;
+
+      answerReview.innerHTML = "";
+      userAnswers.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "answerItem";
+        div.innerHTML = `
+          <p><strong>${index + 1}.</strong> ${item.question}</p>
+          <p>Your answer: <strong>${item.selected}</strong></p>
+          <p>Correct answer: <strong>${item.correct}</strong></p>
+          <p>Status: <strong>${item.isCorrect ? "Correct" : "Wrong"}</strong></p>
+        `;
+        answerReview.appendChild(div);
+      });
+    }
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+    nextBtn.addEventListener("click", nextQuestion);
+  </script>
+</body>
+</html>
